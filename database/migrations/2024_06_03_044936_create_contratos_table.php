@@ -40,7 +40,7 @@ return new class extends Migration
             $table->date('fecha_ini');
             $table->date('fecha_fin');
 
-            $table->integer('codigo');        
+            $table->integer('codigo')->unique();        
             $table->float('cobertura');
             $table->float('pago');
             

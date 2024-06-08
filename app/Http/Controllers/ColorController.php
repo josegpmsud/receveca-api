@@ -3,42 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Color;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\ColorRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class ColorController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
+    {
+        $colors = Color::paginate();
+
+        return view('color.index', compact('colors'))
+            ->with('i', ($request->input('page', 1) - 1) * $colors->perPage());
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
         $color = new Color();
-        return $color->all();
+
+        return view('color.create', compact('color'));
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(ColorRequest $request): RedirectResponse
     {
-        $color = new Color();
-        $color->descripcion = $request->descripcion;        
-        $color->save();
-        return "Registro Guardado Correctamente";
+        Color::create($request->validated());
+
+        return Redirect::route('colors.index')
+            ->with('success', 'Color created successfully.');
     }
 
-    public function show(string $id)
-    {
-        return Color::where('id',$id)->get();
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $color = Color::find($id);
-        $color->descripcion = $request->descripcion;      
-        $color->save();
-        return "Registro Actualizado Correctamente";
-    }
-
-    public function destroy(string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $color = Color::find($id);
-        $color->delete();
-        return "Eliminado correctamente";
+
+        return view('color.show', compact('color'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
+    {
+        $color = Color::find($id);
+
+        return view('color.edit', compact('color'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(ColorRequest $request, Color $color): RedirectResponse
+    {
+        $color->update($request->validated());
+
+        return Redirect::route('colors.index')
+            ->with('success', 'Color updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Color::find($id)->delete();
+
+        return Redirect::route('colors.index')
+            ->with('success', 'Color deleted successfully');
+    }
 }

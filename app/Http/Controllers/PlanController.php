@@ -3,74 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plan;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\PlanRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class PlanController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
+    {
+        $plans = Plan::paginate();
+
+        return view('plan.index', compact('plans'))
+            ->with('i', ($request->input('page', 1) - 1) * $plans->perPage());
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
         $plan = new Plan();
-        return $plan->all();
+
+        return view('plan.create', compact('plan'));
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(PlanRequest $request): RedirectResponse
     {
-        $plan = new Plan();
-        $plan->ter_muerte = $request->ter_muerte;
-        $plan->ter_invalidez = $request->ter_invalidez;
-        $plan->ter_medicos = $request->ter_medicos;
-        $plan->ocu_muerte = $request->ocu_muerte;
-        $plan->ocu_invalidez = $request->ocu_invalidez;
-        $plan->ocu_medicos = $request->ocu_medicos;
-        $plan->danos = $request->danos;
-        $plan->materiales = $request->materiales;
-        $plan->legal = $request->legal;
-        $plan->limites = $request->limites;
-        $plan->funerarios = $request->funerarios;
-        $plan->grua = $request->grua;
-        $plan->indem = $request->indem;
-        $plan->extra = $request->extra;
-        $plan->valor = $request->valor;
-        $plan->descripcion = $request->descripcion;
-        $plan->estado = $request->estado;
-        $plan->save();
-        return "Registro Guardado Correctamente";
+        Plan::create($request->validated());
+
+        return Redirect::route('plans.index')
+            ->with('success', 'Plan created successfully.');
     }
 
-    public function show(string $id)
-    {
-        return Plan::where('id',$id)->get();
-    }
-
-    public function update(Request $request, string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $plan = Plan::find($id);
-        $plan->ter_muerte = $request->ter_muerte;
-        $plan->ter_invalidez = $request->ter_invalidez;
-        $plan->ter_medicos = $request->ter_medicos;
-        $plan->ocu_muerte = $request->ocu_muerte;
-        $plan->ocu_invalidez = $request->ocu_invalidez;
-        $plan->ocu_medicos = $request->ocu_medicos;
-        $plan->danos = $request->danos;
-        $plan->materiales = $request->materiales;
-        $plan->legal = $request->legal;
-        $plan->limites = $request->limites;
-        $plan->funerarios = $request->funerarios;
-        $plan->grua = $request->grua;
-        $plan->indem = $request->indem;
-        $plan->extra = $request->extra;
-        $plan->valor = $request->valor;
-        $plan->descripcion = $request->descripcion;
-        $plan->estado = $request->estado;
-        $plan->save();
-        return "Registro Actualizado Correctamente";
+
+        return view('plan.show', compact('plan'));
     }
 
-    public function destroy(string $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
     {
         $plan = Plan::find($id);
-        $plan->delete();
-        return "Eliminado correctamente";
+
+        return view('plan.edit', compact('plan'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(PlanRequest $request, Plan $plan): RedirectResponse
+    {
+        $plan->update($request->validated());
+
+        return Redirect::route('plans.index')
+            ->with('success', 'Plan updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Plan::find($id)->delete();
+
+        return Redirect::route('plans.index')
+            ->with('success', 'Plan deleted successfully');
+    }
 }

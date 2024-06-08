@@ -3,51 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\UsuarioRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class UsuarioController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
+    {
+        $usuarios = Usuario::paginate();
+
+        return view('usuario.index', compact('usuarios'))
+            ->with('i', ($request->input('page', 1) - 1) * $usuarios->perPage());
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
         $usuario = new Usuario();
-        return $usuario->all();
+
+        return view('usuario.create', compact('usuario'));
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(UsuarioRequest $request): RedirectResponse
     {
-        $usuario = new Usuario();
-        $usuario->nombre = $request->nombre;
-        $usuario->apellido = $request->apellido;
-        $usuario->usuario = $request->usuario;
-        $usuario->contrasena = $request->contrasena;
-        $usuario->id_rol = $request->id_rol;        
-        $usuario->estado = $request->estado; 
-        $usuario->save();
-        return "Registro Guardado Correctamente";
+        Usuario::create($request->validated());
+
+        return Redirect::route('usuarios.index')
+            ->with('success', 'Usuario created successfully.');
     }
 
-    public function show(string $id)
-    {
-        return usuario::where('id',$id)->get();
-    }
-
-    public function update(Request $request, string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $usuario = Usuario::find($id);
-        $usuario->nombre = $request->nombre;
-        $usuario->apellido = $request->apellido;
-        $usuario->usuario = $request->usuario;
-        $usuario->contrasena = $request->contrasena;
-        $usuario->id_rol = $request->id_rol;        
-        $usuario->estado = $request->estado; 
-        $usuario->save();
-        return "Registro Actualizado Correctamente";
+
+        return view('usuario.show', compact('usuario'));
     }
 
-    public function destroy(string $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
     {
         $usuario = Usuario::find($id);
-        $usuario->delete();
-        return "Eliminado correctamente";
+
+        return view('usuario.edit', compact('usuario'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UsuarioRequest $request, Usuario $usuario): RedirectResponse
+    {
+        $usuario->update($request->validated());
+
+        return Redirect::route('usuarios.index')
+            ->with('success', 'Usuario updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Usuario::find($id)->delete();
+
+        return Redirect::route('usuarios.index')
+            ->with('success', 'Usuario deleted successfully');
     }
 }

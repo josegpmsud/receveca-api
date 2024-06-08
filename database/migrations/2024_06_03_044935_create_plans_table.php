@@ -33,7 +33,7 @@ return new class extends Migration
             $table->float('extra');//extraterritorial
 
             $table->float('valor');//en pesos o dollar
-            $table->string('descripcion');//nombre del plan
+            $table->string('descripcion')->unique();//nombre del plan
 
             $table->tinyInteger('estado');
             $table->timestamps();

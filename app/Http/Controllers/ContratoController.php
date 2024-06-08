@@ -3,61 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contrato;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\ContratoRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class ContratoController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
+    {
+        $contratos = Contrato::paginate();
+
+        return view('contrato.index', compact('contratos'))
+            ->with('i', ($request->input('page', 1) - 1) * $contratos->perPage());
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
         $contrato = new Contrato();
-        return $contrato->all();
+
+        return view('contrato.create', compact('contrato'));
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(ContratoRequest $request): RedirectResponse
     {
-        $contrato = new Contrato();
-        $contrato->ter_muerte = $request->ter_muerte;
-        $contrato->ter_invalidez = $request->ter_invalidez;
-        $contrato->ter_medicos = $request->ter_medicos;
-        $contrato->ocu_muerte = $request->ocu_muerte;
-        $contrato->ocu_invalidez = $request->ocu_invalidez;
-        $contrato->ocu_medicos = $request->ocu_medicos;
-        $contrato->danos = $request->danos;
-        $contrato->b_cedula = $request->b_cedula;
-        $contrato->direccion = $request->direccion;
-        $contrato->telefono = $request->telefono;
-        $contrato->estado = $request->estado; 
-        $contrato->save();
-        return "Registro Guardado Correctamente";
+        Contrato::create($request->validated());
+
+        return Redirect::route('contratos.index')
+            ->with('success', 'Contrato created successfully.');
     }
 
-    public function show(string $id)
-    {
-        return Contrato::where('id',$id)->get();
-    }
-
-    public function update(Request $request, string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $contrato = Contrato::find($id);
-        $contrato->ter_muerte = $request->ter_muerte;
-        $contrato->ter_invalidez = $request->ter_invalidez;
-        $contrato->ter_medicos = $request->ter_medicos;
-        $contrato->ocu_muerte = $request->ocu_muerte;
-        $contrato->ocu_invalidez = $request->ocu_invalidez;
-        $contrato->ocu_medicos = $request->ocu_medicos;
-        $contrato->danos = $request->danos;
-        $contrato->b_cedula = $request->b_cedula;
-        $contrato->direccion = $request->direccion;
-        $contrato->telefono = $request->telefono;
-        $contrato->estado = $request->estado;        
-        $contrato->save();
-        return "Registro Actualizado Correctamente";
+
+        return view('contrato.show', compact('contrato'));
     }
 
-    public function destroy(string $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
     {
         $contrato = Contrato::find($id);
-        $contrato->delete();
-        return "Eliminado correctamente";
+
+        return view('contrato.edit', compact('contrato'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(ContratoRequest $request, Contrato $contrato): RedirectResponse
+    {
+        $contrato->update($request->validated());
+
+        return Redirect::route('contratos.index')
+            ->with('success', 'Contrato updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Contrato::find($id)->delete();
+
+        return Redirect::route('contratos.index')
+            ->with('success', 'Contrato deleted successfully');
     }
 }

@@ -60,7 +60,7 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
 
-            $table->string('placa');
+            $table->string('placa')->unique();
             $table->integer('ano');//solo 4 digitos
             $table->string('peso');
             $table->string('serial_motor');

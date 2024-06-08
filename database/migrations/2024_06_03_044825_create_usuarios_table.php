@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');            
             $table->string('apellido');        
-            $table->string('usuario');
+            $table->string('usuario')->unique();
             $table->string('contrasena');//agregar numero de campos debe estar hashada
             
             $table->unsignedBigInteger('id_rol');

@@ -3,41 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Uso;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\UsoRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class UsoController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
     {
-        $uso = new uso();
-        return $uso->all();
+        $usos = Uso::paginate();
+
+        return view('uso.index', compact('usos'))
+            ->with('i', ($request->input('page', 1) - 1) * $usos->perPage());
     }
 
-    public function store(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
         $uso = new Uso();
-        $uso->descripcion = $request->descripcion;        
-        $uso->save();
-        return "Registro Guardado Correctamente";
+
+        return view('uso.create', compact('uso'));
     }
 
-    public function show(string $id)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(UsoRequest $request): RedirectResponse
     {
-        return Uso::where('id',$id)->get();
+        Uso::create($request->validated());
+
+        return Redirect::route('usos.index')
+            ->with('success', 'Uso created successfully.');
     }
 
-    public function update(Request $request, string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $uso = Uso::find($id);
-        $uso->descripcion = $request->descripcion;      
-        $uso->save();
-        return "Registro Actualizado Correctamente";
+
+        return view('uso.show', compact('uso'));
     }
 
-    public function destroy(string $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
     {
         $uso = Uso::find($id);
-        $uso->delete();
-        return "Eliminado correctamente";
+
+        return view('uso.edit', compact('uso'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UsoRequest $request, Uso $uso): RedirectResponse
+    {
+        $uso->update($request->validated());
+
+        return Redirect::route('usos.index')
+            ->with('success', 'Uso updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Uso::find($id)->delete();
+
+        return Redirect::route('usos.index')
+            ->with('success', 'Uso deleted successfully');
     }
 }

@@ -3,64 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vehiculo;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\VehiculoRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class VehiculoController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
     {
-        $vehiculo = new vehiculo();
-        return $vehiculo->all();
+        $vehiculos = Vehiculo::paginate();
+
+        return view('vehiculo.index', compact('vehiculos'))
+            ->with('i', ($request->input('page', 1) - 1) * $vehiculos->perPage());
     }
 
-    public function store(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
-        $vehiculo = new vehiculo();
-        $vehiculo->id_cliente = $request->id_cliente;
-        $vehiculo->id_marca = $request->id_marca;
-        $vehiculo->id_clase = $request->id_clase;
-        $vehiculo->id_color = $request->id_color;
-        $vehiculo->id_tipo = $request->id_tipo;        
-        $vehiculo->id_uso = $request->id_uso;
-        $vehiculo->placa = $request->placa;
-        $vehiculo->ano = $request->ano;
-        $vehiculo->peso = $request->peso;
-        $vehiculo->serial_motor = $request->serial_motor;
-        $vehiculo->puestos = $request->puestos;
-        $vehiculo->serial_niv = $request->serial_niv;        
-       
-        $vehiculo->save();
-        return "Registro Guardado Correctamente";
+        $vehiculo = new Vehiculo();
+
+        return view('vehiculo.create', compact('vehiculo'));
     }
 
-    public function show(string $id)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(VehiculoRequest $request): RedirectResponse
     {
-        return Vehiculo::where('id',$id)->get();
+        Vehiculo::create($request->validated());
+
+        return Redirect::route('vehiculos.index')
+            ->with('success', 'Vehiculo created successfully.');
     }
 
-    public function update(Request $request, string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $vehiculo = Vehiculo::find($id);
-        $vehiculo->id_cliente = $request->id_cliente;
-        $vehiculo->id_marca = $request->id_marca;
-        $vehiculo->id_clase = $request->id_clase;
-        $vehiculo->id_color = $request->id_color;
-        $vehiculo->id_tipo = $request->id_tipo;        
-        $vehiculo->id_uso = $request->id_uso;
-        $vehiculo->placa = $request->placa;
-        $vehiculo->ano = $request->ano;
-        $vehiculo->peso = $request->peso;
-        $vehiculo->serial_motor = $request->serial_motor;
-        $vehiculo->puestos = $request->puestos;
-        $vehiculo->serial_niv = $request->serial_niv;      
-        $vehiculo->save();
-        return "Registro Actualizado Correctamente";
+
+        return view('vehiculo.show', compact('vehiculo'));
     }
 
-    public function destroy(string $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
     {
         $vehiculo = Vehiculo::find($id);
-        $vehiculo->delete();
-        return "Eliminado correctamente";
+
+        return view('vehiculo.edit', compact('vehiculo'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(VehiculoRequest $request, Vehiculo $vehiculo): RedirectResponse
+    {
+        $vehiculo->update($request->validated());
+
+        return Redirect::route('vehiculos.index')
+            ->with('success', 'Vehiculo updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Vehiculo::find($id)->delete();
+
+        return Redirect::route('vehiculos.index')
+            ->with('success', 'Vehiculo deleted successfully');
     }
 }

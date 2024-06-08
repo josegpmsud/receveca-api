@@ -3,61 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\ClienteRequest;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 
 class ClienteController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
+    {
+        $clientes = Cliente::paginate();
+
+        return view('cliente.index', compact('clientes'))
+            ->with('i', ($request->input('page', 1) - 1) * $clientes->perPage());
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
         $cliente = new Cliente();
-        return $cliente->all();
+
+        return view('cliente.create', compact('cliente'));
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(ClienteRequest $request): RedirectResponse
     {
-        $cliente = new Cliente();
-        $cliente->nac = $request->nac;
-        $cliente->nombre = $request->nombre;
-        $cliente->apellido = $request->apellido;
-        $cliente->cedula_rif = $request->cedula_rif;
-        $cliente->b_nac = $request->b_nac;
-        $cliente->b_nombre = $request->b_nombre;
-        $cliente->b_apellido = $request->b_apellido;
-        $cliente->b_cedula = $request->b_cedula;
-        $cliente->direccion = $request->direccion;
-        $cliente->telefono = $request->telefono;
-        $cliente->estado = $request->estado; 
-        $cliente->save();
-        return "Registro Guardado Correctamente";
+        Cliente::create($request->validated());
+
+        return Redirect::route('clientes.index')
+            ->with('success', 'Cliente created successfully.');
     }
 
-    public function show(string $id)
-    {
-        return Cliente::where('id',$id)->get();
-    }
-
-    public function update(Request $request, string $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id): View
     {
         $cliente = Cliente::find($id);
-        $cliente->nac = $request->nac;
-        $cliente->nombre = $request->nombre;
-        $cliente->apellido = $request->apellido;
-        $cliente->cedula_rif = $request->cedula_rif;
-        $cliente->b_nac = $request->b_nac;
-        $cliente->b_nombre = $request->b_nombre;
-        $cliente->b_apellido = $request->b_apellido;
-        $cliente->b_cedula = $request->b_cedula;
-        $cliente->direccion = $request->direccion;
-        $cliente->telefono = $request->telefono;
-        $cliente->estado = $request->estado;  
-        $cliente->save();
-        return "Registro Actualizado Correctamente";
+
+        return view('cliente.show', compact('cliente'));
     }
 
-    public function destroy(string $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id): View
     {
         $cliente = Cliente::find($id);
-        $cliente->delete();
-        return "Eliminado correctamente";
+
+        return view('cliente.edit', compact('cliente'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(ClienteRequest $request, Cliente $cliente): RedirectResponse
+    {
+        $cliente->update($request->validated());
+
+        return Redirect::route('clientes.index')
+            ->with('success', 'Cliente updated successfully');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        Cliente::find($id)->delete();
+
+        return Redirect::route('clientes.index')
+            ->with('success', 'Cliente deleted successfully');
     }
 }

@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->string('nombre');            
             $table->string('apellido'); 
-            $table->string('cedula_rif');
+            $table->string('cedula_rif')->unique();
 
             $table->string('b_nac');
             $table->string('b_nombre');            
