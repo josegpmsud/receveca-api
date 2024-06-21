@@ -82,7 +82,14 @@
                 </div>
             </div>
         </nav>
-
+        <ul>
+            <li class="nav-link" >
+                <a href="{{ route('clientes.index')}}">Clientes</a>
+            </li> 
+            <li class="nav-link" >
+                <a href="{{ route('vehiculos.index')}}">Vehiculos</a>
+            </li> 
+            </ul>
         <main class="py-4">
             @yield('content')
         </main>
